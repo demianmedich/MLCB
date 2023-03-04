@@ -13,6 +13,7 @@ dependencies = [
     'torch',
     'loguru',
     'pydantic',
+    'tqdm',
 ]
 [project.optional-dependencies]
 dev = [

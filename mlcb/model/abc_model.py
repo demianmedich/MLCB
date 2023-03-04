@@ -37,7 +37,7 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
         Returns:
             Tensor: The loss tensor
             dict: A dictionary include `loss`
-            None: Training will skip to the next batch
+            None: Trainer will skip to the next batch
 
         Example:
             def training_step(self, batch, batch_idx):
@@ -76,7 +76,7 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
 
         Returns:
             Any: Any object or values
-            None: this step will be skip to the next batch
+            None: Trainer will skip to the next batch
         """
         pass
 
@@ -91,11 +91,23 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
 
         Returns:
             Any: Any object or values
-            None: this step will be skip to the next batch
+            None: Trainer will skip to the next batch
         """
         pass
 
     def predict_step(self, batch: Any, batch_idx: int) -> Any:
+        """Execute predict step on a mini-batch.
+
+        In this step, you'd might generate prediction output.
+
+        Args:
+            batch: The output of your DataLoader
+            batch_idx: The index of a mini-batch
+
+        Returns:
+            Any: Any object or values
+            None: Trainer will skip to the next batch
+        """
         pass
 
     @property
@@ -114,7 +126,7 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
         if trainer is None:
             raise Exception("self.trainer is `None`.")
 
-        opts = trainer._optimizers
+        opts = trainer.optimizers
 
         if len(opts) == 1 and isinstance(opts[0], Optimizer):
             return opts[0]

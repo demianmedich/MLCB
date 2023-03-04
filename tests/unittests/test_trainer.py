@@ -51,9 +51,9 @@ class MockModel(ABCModel):
         epoch = self.trainer.current_epoch
         step = self.trainer.current_step
 
-        logger.info(
-            f"[EPOCH {epoch:03d}][STEPS {step:03d}] validation loss: {loss}, x: {x}, out: {out}, y: {y}"
-        )
+        # logger.info(
+        #     f"[EPOCH {epoch:03d}][STEPS {step:03d}] validation loss: {loss}, x: {x}, out: {out}, y: {y}"
+        # )
 
 
 class MockDataset(Dataset):
@@ -73,8 +73,8 @@ class MockDataset(Dataset):
 
 def test_trainer_toy_dataset():
     train_dataset = MockDataset(0, 100)
-    train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=True)
-    val_dataset = MockDataset(100, 200)
+    train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True)
+    val_dataset = MockDataset(20000, 20200)
     val_dataloader = DataLoader(val_dataset, batch_size=1)
     model = MockModel()
     optimizer = SGD(model.parameters(), 0.00001)

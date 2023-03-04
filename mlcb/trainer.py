@@ -6,22 +6,27 @@ import torch
 from torch import Tensor
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from mlcb.model.abc_model import ABCModel
 
 
 class Trainer:
     def __init__(
-        self,
-        num_gpus: int = 1,
-        num_nodes: int = 1,
-        max_epochs: int = 1,
-        max_steps: int = -1,
+            self,
+            num_gpus: int = 1,
+            num_nodes: int = 1,
+            max_epochs: int = 1,
+            max_steps: int = -1,
+            enable_tqdm: bool = True,
+            refresh_steps: int = 5,
     ) -> None:
         self.num_gpus = num_gpus
         self.num_nodes = num_nodes
         self.max_epochs = max_epochs
         self.max_steps = max_steps
+        self.enable_tqdm = enable_tqdm
+        self.refresh_steps = refresh_steps
 
         self._current_epoch = 0
         self._current_step = 0
@@ -43,12 +48,12 @@ class Trainer:
         return self._current_step
 
     def fit(
-        self,
-        model: ABCModel,
-        optimizers: Optimizer | Iterable[Optimizer],
-        train_dataloader: DataLoader,
-        val_dataloader: DataLoader | None,
-        ckpt_path: str | Path | None = None,
+            self,
+            model: ABCModel,
+            optimizers: Optimizer | Iterable[Optimizer],
+            train_dataloader: DataLoader,
+            val_dataloader: DataLoader | None,
+            ckpt_path: str | Path | None = None,
     ) -> None:
         # TODO: Supports distributed training
         self._set_model(model)
@@ -75,7 +80,7 @@ class Trainer:
         ...
 
     def _train_on_device(
-        self, train_dataloader: DataLoader, val_dataloader: DataLoader | None
+            self, train_dataloader: DataLoader, val_dataloader: DataLoader | None
     ) -> None:
         model = self._model
         model.on_fit_start()
@@ -97,6 +102,19 @@ class Trainer:
         model.on_train_epoch_start()
 
         # TODO: Supports TQDM progress bar
+        if self.enable_tqdm:
+            bar_format = "{desc}: {percentage:5d}|{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]"
+            dataloader = tqdm(
+                iterable=dataloader,
+                desc="[EPOCHS {num:{fill}{width}}]".format(
+                    num=self.current_epoch,
+                    fill=0,
+                    width=len(str(self.max_epochs)),
+                ),
+                total=len(dataloader),
+                miniters=self.refresh_steps
+            )
+
         for i, batch in enumerate(dataloader):
             self._current_step += 1
 
