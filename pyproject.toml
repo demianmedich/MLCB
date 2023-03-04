@@ -1,0 +1,22 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "mlcb"
+authors = [{name = "Seonwoo Lee", email = "demianmedich@gmail.com"}]
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version", "description"]
+
+dependencies = [
+    'torch',
+    'loguru',
+    'pydantic',
+]
+[project.optional-dependencies]
+dev = [
+    'pytest',
+    'black',
+    'isort',
+]
