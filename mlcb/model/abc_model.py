@@ -1,11 +1,11 @@
 # coding=utf-8
 import weakref
-from abc import ABCMeta, abstractmethod
-
-from torch.nn import Module
+from abc import ABCMeta
 from typing import TYPE_CHECKING, Any, Optional
 
+from torch.nn import Module
 from torch.optim import Optimizer
+
 from mlcb.hooks import ModelHooks
 
 if TYPE_CHECKING:
@@ -13,20 +13,18 @@ if TYPE_CHECKING:
 
 
 class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
-
     def __init__(self):
         super().__init__()
 
         self._trainer: Optional["Trainer"] = None
-        self._automatic_optimization: bool = False
+        self._automatic_optimization: bool = True
 
-    @abstractmethod
     def forward(self, *args, **kwargs) -> Any:
         """Inference method.
 
         This is for inference method not same with torch.Module.forward()
         """
-        raise NotImplementedError()
+        pass
 
     def training_step(self, batch: Any, batch_idx: int) -> Any:
         """Compute training loss and returns it and some additional metrics.
@@ -68,9 +66,33 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
         pass
 
     def validation_step(self, batch: Any, batch_idx: int) -> Any:
+        """Execute validation step on a mini-batch.
+
+        In this step, you'd might generate examples or calculate something related with evaluation metric.
+
+        Args:
+            batch: The output of your DataLoader
+            batch_idx: The index of a mini-batch
+
+        Returns:
+            Any: Any object or values
+            None: this step will be skip to the next batch
+        """
         pass
 
     def test_step(self, batch: Any, batch_idx: int) -> Any:
+        """Execute test step on a mini-batch.
+
+        In this step, you'd might generate examples or calculate something related with evaluation metric.
+
+        Args:
+            batch: The output of your DataLoader
+            batch_idx: The index of a mini-batch
+
+        Returns:
+            Any: Any object or values
+            None: this step will be skip to the next batch
+        """
         pass
 
     def predict_step(self, batch: Any, batch_idx: int) -> Any:
