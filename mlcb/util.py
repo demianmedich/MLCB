@@ -1,12 +1,12 @@
 # coding=utf-8
 import warnings
-from loguru import logger
 
 import torch.distributed as dist
+from loguru import logger
 
 
 def rank_zero_warn(msg: str) -> None:
-    """print on """
+    """print on"""
     if dist.is_initialized():
         if dist.get_rank(dist.group.WORLD) == 0:
             logger.warning(msg)
