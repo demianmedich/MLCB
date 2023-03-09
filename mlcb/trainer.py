@@ -7,7 +7,7 @@ from torch import Tensor
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
-from mlcb.model.abc_model import ABCModel
+from mlcb.model.abc_model import ABCHookBasedModel
 
 
 class Trainer:
@@ -26,7 +26,7 @@ class Trainer:
         self._current_epoch = 0
         self._current_step = 0
 
-        self._model: ABCModel | None = None
+        self._model: ABCHookBasedModel | None = None
         self._optimizers: list[Optimizer] = []
         # TODO: Supports learning-rate scheduler
 
@@ -44,7 +44,7 @@ class Trainer:
 
     def fit(
         self,
-        model: ABCModel,
+        model: ABCHookBasedModel,
         optimizers: Optimizer | Iterable[Optimizer],
         train_dataloader: DataLoader,
         val_dataloader: DataLoader | None,
@@ -58,7 +58,7 @@ class Trainer:
 
         self._train_on_device(train_dataloader, val_dataloader)
 
-    def _set_model(self, model: ABCModel):
+    def _set_model(self, model: ABCHookBasedModel):
         self._model = model
         model.trainer = self
 
@@ -96,6 +96,8 @@ class Trainer:
         model = self._model
         model.on_train_epoch_start()
 
+        train_output_list = []
+
         # TODO: Supports TQDM progress bar
         for i, batch in enumerate(dataloader):
             self._current_step += 1
@@ -104,15 +106,17 @@ class Trainer:
             train_output = model.training_step(batch, i)
             if train_output is None:
                 continue
+            train_output_list.append(train_output)
 
             if not model.automatic_optimization:
                 continue
 
+            # TODO: Supports gradient accumulation
             self._optimizer_zero_grad()
             self._backward(train_output)
             self._optimizer_step()
 
-        model.on_train_epoch_end()
+        model.on_train_epoch_end(train_output_list)
 
     def _validation_loop(self, dataloader: DataLoader) -> None:
         model = self._model
@@ -121,11 +125,13 @@ class Trainer:
         torch.set_grad_enabled(False)
         model.on_validation_start()
 
+        val_output_list = []
         for i, batch in enumerate(dataloader):
             batch = self._transfer_batch_to_device(batch)
             val_output = model.validation_step(batch, i)
+            val_output_list.append(val_output)
 
-        model.on_validation_end()
+        model.on_validation_end(val_output_list)
         model.train()
         torch.set_grad_enabled(True)
 

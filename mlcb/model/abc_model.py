@@ -12,7 +12,20 @@ if TYPE_CHECKING:
     from mlcb.trainer import Trainer
 
 
-class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
+class ABCModel(Module, metaclass=ABCMeta):
+    """Class for Basic Model Unit"""
+
+    def forward(self, *args, **kwargs) -> Any:
+        """Feed-forward method"""
+        raise NotImplementedError()
+
+
+class ABCHookBasedModel(ModelHooks, Module, metaclass=ABCMeta):
+    """Class for Hook based Model using ABCModel.
+
+    This model will be used in `Trainer`
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -22,7 +35,10 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
     def forward(self, *args, **kwargs) -> Any:
         """Inference method.
 
-        This is for inference method not same with torch.Module.forward()
+        This is for inference method not same with torch.Module.forward().
+
+        Returns:
+            inference result
         """
         pass
 
@@ -76,7 +92,7 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
 
         Returns:
             Any: Any object or values
-            None: this step will be skip to the next batch
+            None: this step will skip to the next batch
         """
         pass
 
@@ -91,11 +107,21 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
 
         Returns:
             Any: Any object or values
-            None: this step will be skip to the next batch
+            None: this step will skip to the next batch
         """
         pass
 
     def predict_step(self, batch: Any, batch_idx: int) -> Any:
+        """Execute prediction step to calculate
+
+        Args:
+            batch: The output of your DataLoader
+            batch_idx: The index of a mini-batch
+
+        Returns:
+            Any: Any object or values
+            None: this step will skip to the next batch
+        """
         pass
 
     @property
@@ -114,7 +140,7 @@ class ABCModel(ModelHooks, Module, metaclass=ABCMeta):
         if trainer is None:
             raise Exception("self.trainer is `None`.")
 
-        opts = trainer._optimizers
+        opts = trainer.optimizers
 
         if len(opts) == 1 and isinstance(opts[0], Optimizer):
             return opts[0]

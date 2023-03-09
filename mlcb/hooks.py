@@ -1,5 +1,5 @@
 # coding=utf-8
-from typing import Iterable
+from typing import Any, Iterable
 
 from torch.utils.data import DataLoader
 
@@ -33,32 +33,48 @@ class ModelHooks:
         """Called at the beginning of training epoch"""
         pass
 
-    def on_train_epoch_end(self) -> None:
-        """Called at the end of training epoch"""
+    def on_train_epoch_end(self, output_list: list[Any]) -> None:
+        """Called at the end of training epoch
+
+        Args:
+            output_list: a list of returned outputs from ABCHookBasedModel.training_step()
+        """
         pass
 
     def on_validation_start(self) -> None:
         """Called at the beginning of validation."""
         pass
 
-    def on_validation_end(self) -> None:
-        """Called at the end of validation."""
+    def on_validation_end(self, output_list: list[Any]) -> None:
+        """Called at the end of validation.
+
+        Args:
+            output_list: a list of returned outputs from ABCHookBasedModel.validation_step()
+        """
         pass
 
     def on_test_start(self) -> None:
         """Called at the beginning of testing."""
         pass
 
-    def on_test_end(self) -> None:
-        """Called at the end of testing."""
+    def on_test_end(self, output_list: list[Any]) -> None:
+        """Called at the end of testing.
+
+        Args:
+            output_list: a list of returned outputs from ABCHookBasedModel.test_step()
+        """
         pass
 
     def on_predict_start(self) -> None:
         """Called at the beginning of predicting."""
         pass
 
-    def on_predict_end(self) -> None:
-        """Called at the end of predicting."""
+    def on_predict_end(self, output_list: list[Any]) -> None:
+        """Called at the end of predicting.
+
+        Args:
+            output_list: a list of returned outputs from predict_step
+        """
         pass
 
 
