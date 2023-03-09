@@ -9,11 +9,11 @@ from torch.nn.functional import mse_loss
 from torch.optim import SGD
 from torch.utils.data import DataLoader, Dataset
 
-from mlcb.model.abc_model import ABCModel
+from mlcb.model.abc_model import ABCHookBasedModel
 from mlcb.trainer import Trainer
 
 
-class MockModel(ABCModel):
+class MockModel(ABCHookBasedModel):
     def __init__(self):
         super().__init__()
 
