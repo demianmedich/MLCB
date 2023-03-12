@@ -16,7 +16,10 @@ class ABCModel(Module, metaclass=ABCMeta):
     """Class for Basic Model Unit"""
 
     def forward(self, *args, **kwargs) -> Any:
-        """Feed-forward method"""
+        """Feed-forward method
+
+        Return last layer output of this model.
+        """
         raise NotImplementedError()
 
 
@@ -111,7 +114,7 @@ class ABCHookBasedModel(ModelHooks, Module, metaclass=ABCMeta):
         """
         pass
 
-    def predict_step(self, batch: Any, batch_idx: int) -> Any:
+    def prediction_step(self, batch: Any, batch_idx: int) -> Any:
         """Execute prediction step to calculate
 
         Args:
@@ -121,6 +124,18 @@ class ABCHookBasedModel(ModelHooks, Module, metaclass=ABCMeta):
         Returns:
             Any: Any object or values
             None: this step will skip to the next batch
+        """
+        pass
+
+    def evaluate_epoch_metrics(
+        self, stage: str, predictions: list[Any], labels: list[Any]
+    ) -> None:
+        """Evaluate metrics using given predictions and labels.
+
+        Args:
+            stage: string one of [`val`, `test`]
+            predictions: a list of prediction steps
+            labels: a list of label
         """
         pass
 
