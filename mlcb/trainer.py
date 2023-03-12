@@ -58,6 +58,18 @@ class Trainer:
 
         self._train_on_device(train_dataloader, val_dataloader)
 
+    def test(
+        self,
+        model: ABCHookBasedModel,
+        test_dataloader: DataLoader,
+        ckpt_path: str | Path | None = None,
+    ) -> None:
+        self._set_model(model)
+        if ckpt_path:
+            self._load_checkpoint(Path(ckpt_path))
+
+        self._test_on_device(test_dataloader)
+
     def _set_model(self, model: ABCHookBasedModel):
         self._model = model
         model.trainer = self
@@ -75,7 +87,9 @@ class Trainer:
         ...
 
     def _train_on_device(
-        self, train_dataloader: DataLoader, val_dataloader: DataLoader | None
+        self,
+        train_dataloader: DataLoader,
+        val_dataloader: DataLoader | None = None,
     ) -> None:
         model = self._model
         model.on_fit_start()
@@ -132,6 +146,22 @@ class Trainer:
             val_output_list.append(val_output)
 
         model.on_validation_end(val_output_list)
+        model.train()
+        torch.set_grad_enabled(True)
+
+    def _test_on_device(self, dataloader: DataLoader) -> None:
+        model = self._model
+        model.eval()
+        torch.set_grad_enabled(False)
+        model.on_test_start()
+
+        output_list = []
+        for i, batch in enumerate(dataloader):
+            batch = self._transfer_batch_to_device(batch)
+            output = model.test_step(batch, i)
+            output_list.append(output)
+
+        model.on_test_end(output_list)
         model.train()
         torch.set_grad_enabled(True)
 
